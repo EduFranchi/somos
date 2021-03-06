@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:somos/model/UserModel.dart';
+import 'package:somos/model/view-model/SearchUserViewModel.dart';
 import 'package:somos/view/default/my_const.dart';
 import 'package:somos/view/default/my_functions.dart';
 import 'package:somos/view/default/my_widgets.dart';
 import 'package:somos/view/FavoriteList.dart';
+import 'package:somos/controller/UserController.dart';
 
 class UserList extends StatefulWidget {
   @override
@@ -11,6 +14,10 @@ class UserList extends StatefulWidget {
 }
 
 class _UserListState extends State<UserList> {
+  UserController _userController = UserController();
+  SearchUserViewModel _searchUserViewModel = SearchUserViewModel();
+  List<UserModel> _listUserModel = List<UserModel>();
+
   _openFavoriteList() {
     Navigator.push(
       context,
@@ -20,6 +27,38 @@ class _UserListState extends State<UserList> {
         },
       ),
     );
+  }
+
+  _getUserList() {
+    setState(() {
+      _searchUserViewModel.busy = true;
+    });
+    _userController.getUserList(_searchUserViewModel).then((value) {
+      if (value.message.isEmpty) {
+        _listUserModel = List.generate(
+          value.list.length,
+          (i) {
+            return value.list[i];
+          },
+        );
+        setState(() {
+          _searchUserViewModel.busy = false;
+        });
+      } else {
+        flutterToastDefault(value.message);
+        setState(() {
+          _searchUserViewModel.busy = false;
+        });
+      }
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserList();
   }
 
   @override
@@ -83,15 +122,44 @@ class _UserListState extends State<UserList> {
                 Padding(
                   padding: EdgeInsets.only(bottom: 20),
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: 30,
-                    itemBuilder: (_, index) {
-                      return UserSimple();
-                    },
-                  ),
-                ),
+                (_searchUserViewModel.busy
+                    ? Padding(
+                        padding: EdgeInsets.only(
+                            top: (screenSize(context).height -
+                                    safeAreaSize(context).top -
+                                    56 -
+                                    25) /
+                                3),
+                        child: SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(BG_COLOR_DEFAULT),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Expanded(
+                        child: ListView.separated(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          itemCount: _listUserModel.length,
+                          itemBuilder: (_, index) {
+                            return UserSimple(model: _listUserModel[index]);
+                          },
+                          separatorBuilder: (_, index) {
+                            return SizedBox(
+                              height: 1,
+                              width: double.infinity,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFE8E8E8),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )),
               ],
             ),
           ),

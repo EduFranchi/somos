@@ -60,5 +60,6 @@ flutterToastDefault(String message) {
     gravity: ToastGravity.BOTTOM,
     backgroundColor: Color(0xFF636363),
     textColor: Colors.white,
+    timeInSecForIosWeb: 10,
   );
 }
