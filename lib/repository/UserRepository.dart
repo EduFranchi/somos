@@ -10,25 +10,32 @@ class UserRepository {
   Future<ErrorViewModel> getListByAPI(SearchUserViewModel model) async {
     ErrorViewModel errorViewModel = ErrorViewModel();
 
+    bool byNickname = model.nickname != null && model.nickname.trim() != "";
+
     try {
-      String param = model.nickname != null && model.nickname.trim() != ""
-          ? "/${model.nickname.trim()}"
-          : "";
+      String param = byNickname ? "/${model.nickname.trim()}" : "";
+
+      param += "?per_page=${model.qtdePerPage}";
       String url = "$URL_API_DEFAULT$param";
 
+      Map<String, String> headers = {
+        'Accept': 'application/vnd.github.v3+json',
+      };
+      print(url);
       await http
           .get(
         url,
+        headers: headers,
       )
           .then(
         (value) {
-          //print("statusCode[getUser]: " + value.statusCode.toString());
-          //print("getUser: " + value.body);
           var response = json.decode(value.body);
           errorViewModel.list = List.generate(
-            response.length,
+            byNickname ? 1 : response.length,
             (i) {
-              return UserModel.fromJson(response[i]);
+              return byNickname
+                  ? UserModel.fromJson(response)
+                  : UserModel.fromJson(response[i]);
             },
           );
         },
