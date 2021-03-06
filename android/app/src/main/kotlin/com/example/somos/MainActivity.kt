@@ -1,4 +1,4 @@
-package com.example.somos
+package com.somos.somosTest
 
 import io.flutter.embedding.android.FlutterActivity
 
