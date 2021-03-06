@@ -6,9 +6,12 @@ import 'package:somos/view/default/my_widgets.dart';
 class UserSimple extends StatefulWidget {
   UserSimple({
     @required this.model,
+    @required this.funcReload,
   });
 
   final UserModel model;
+
+  final Function(dynamic) funcReload;
 
   @override
   _UserSimpleState createState() => _UserSimpleState();
@@ -23,7 +26,7 @@ class _UserSimpleState extends State<UserSimple> {
           return UserDetails(model: widget.model);
         },
       ),
-    );
+    ).then(widget.funcReload);
   }
 
   @override
@@ -52,7 +55,7 @@ class _UserSimpleState extends State<UserSimple> {
           Container(
             width: 30,
             height: 30,
-            child: FavoriteStar(nickname: widget.model.login),
+            child: FavoriteStar(model: widget.model),
           ),
         ],
       ),

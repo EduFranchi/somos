@@ -65,8 +65,11 @@ class _UserListState extends State<UserList> {
         });
       }
     }).catchError((e) {
-      print(e);
-      flutterToastDefault(e);
+      print(e.toString());
+      flutterToastDefault(e.toString());
+      setState(() {
+        _searchUserViewModel.busy = false;
+      });
     });
   }
 
@@ -256,7 +259,11 @@ class _UserListState extends State<UserList> {
                             itemCount: _listUserModelShow.length,
                             itemBuilder: (_, index) {
                               return UserSimple(
-                                  model: _listUserModelShow[index]);
+                                model: _listUserModelShow[index],
+                                funcReload: (value) {
+                                  _getUserList();
+                                },
+                              );
                             },
                             separatorBuilder: (_, index) {
                               return SizedBox(

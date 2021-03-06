@@ -137,7 +137,7 @@ class _UserDetailsState extends State<UserDetails> {
                               child: Container(
                                 width: 30,
                                 height: 30,
-                                child: FavoriteStar(nickname: _userModel.login),
+                                child: FavoriteStar(model: _userModel),
                               ),
                             ),
                           ),

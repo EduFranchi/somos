@@ -38,20 +38,11 @@ Future<Database> getDatabase() async {
     join(await getDatabasesPath(), DATABASE_NAME),
     onCreate: (db, version) {
       db.execute(
-        "CREATE TABLE $TABLE_FAVORITE_USERS_NAME(id INTEGER PRIMARY KEY AUTOINCREMENT, nickname TEXT UNIQUE, email TEXT UNIQUE, bio TEXT UNIQUE, location TEXT UNIQUE);",
+        "CREATE TABLE $TABLE_FAVORITE_USERS_NAME(id INTEGER PRIMARY KEY AUTOINCREMENT, login TEXT UNIQUE, email TEXT UNIQUE, bio TEXT, location TEXT, avatarUrl TEXT);",
       );
     },
     version: 1,
   );
-}
-
-Future<String> encodeBase64File(String path) async {
-  final bytes = await File(path).readAsBytes();
-  return base64.encode(bytes);
-}
-
-Uint8List decodeBase64File(String imageBase64) {
-  return base64Decode(imageBase64);
 }
 
 flutterToastDefault(String message) {
@@ -60,6 +51,6 @@ flutterToastDefault(String message) {
     gravity: ToastGravity.BOTTOM,
     backgroundColor: Color(0xFF636363),
     textColor: Colors.white,
-    timeInSecForIosWeb: 10,
+    timeInSecForIosWeb: 5,
   );
 }
