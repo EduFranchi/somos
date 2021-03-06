@@ -45,6 +45,12 @@ class _UserDetailsState extends State<UserDetails> {
         setState(() {
           _searchUserViewModel.busy = false;
         });
+      } else if (value.list[0] == null) {
+        flutterToastDefault(
+            "Usuário não encontrado!\nVerifique sua conexão com a internet.");
+        setState(() {
+          _searchUserViewModel.busy = false;
+        });
       } else {
         flutterToastDefault(value.message);
         setState(() {
@@ -140,7 +146,7 @@ class _UserDetailsState extends State<UserDetails> {
                           },
                         ),
                         Padding(padding: EdgeInsets.only(top: 20)),
-                        _userModel.bio != null
+                        _userModel.login != null
                             ? Column(
                                 children: [
                                   Text(

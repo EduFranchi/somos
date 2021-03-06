@@ -81,7 +81,9 @@ class _UserListState extends State<UserList> {
           "type": 0,
           "dismissBefore": true,
           "dismissAfter": false,
-          "onTap": () {},
+          "onTap": () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
         },
       ],
       content: Container(
