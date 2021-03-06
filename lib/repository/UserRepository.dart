@@ -15,13 +15,15 @@ class UserRepository {
     try {
       String param = byNickname ? "/${model.nickname.trim()}" : "";
 
-      param += "?per_page=${model.qtdePerPage}";
+      param += model.qtdePerPage != null && model.qtdePerPage > 0
+          ? "?per_page=${model.qtdePerPage}"
+          : "";
       String url = "$URL_API_DEFAULT$param";
 
       Map<String, String> headers = {
         'Accept': 'application/vnd.github.v3+json',
       };
-      print(url);
+
       await http
           .get(
         url,

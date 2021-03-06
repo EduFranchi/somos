@@ -20,7 +20,7 @@ class _UserSimpleState extends State<UserSimple> {
       context,
       MaterialPageRoute(
         builder: (_) {
-          return UserDetails();
+          return UserDetails(model: widget.model);
         },
       ),
     );

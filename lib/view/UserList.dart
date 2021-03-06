@@ -66,6 +66,7 @@ class _UserListState extends State<UserList> {
       }
     }).catchError((e) {
       print(e);
+      flutterToastDefault(e);
     });
   }
 

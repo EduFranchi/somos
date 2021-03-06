@@ -1,25 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:somos/controller/UserController.dart';
+import 'package:somos/model/UserModel.dart';
+import 'package:somos/model/view-model/SearchUserViewModel.dart';
 import 'package:somos/view/OpenPicture.dart';
 import 'package:somos/view/default/my_const.dart';
 import 'package:somos/view/default/my_functions.dart';
 import 'package:somos/view/default/my_widgets.dart';
 
 class UserDetails extends StatefulWidget {
+  UserDetails({
+    @required this.model,
+  });
+
+  final UserModel model;
+
   @override
   _UserDetailsState createState() => _UserDetailsState();
 }
 
 class _UserDetailsState extends State<UserDetails> {
+  UserController _userController = UserController();
+  SearchUserViewModel _searchUserViewModel = SearchUserViewModel();
+  UserModel _userModel = UserModel();
+
   _openPicture() {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) {
-          return OpenPicture();
+          return OpenPicture(avatarUrl: _userModel.avatarUrl);
         },
       ),
     );
+  }
+
+  _getUserList() {
+    setState(() {
+      _searchUserViewModel.busy = true;
+    });
+    _userController.getUserList(_searchUserViewModel).then((value) {
+      if (value.message.isEmpty) {
+        _userModel = value.list[0];
+        setState(() {
+          _searchUserViewModel.busy = false;
+        });
+      } else {
+        flutterToastDefault(value.message);
+        setState(() {
+          _searchUserViewModel.busy = false;
+        });
+      }
+    }).catchError((e) {
+      print(e);
+      flutterToastDefault(e);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.model != null && widget.model.login.isNotEmpty) {
+      _searchUserViewModel.nickname = widget.model.login;
+      _getUserList();
+    } else {
+      flutterToastDefault("Usuário não encontrado!");
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -46,60 +93,104 @@ class _UserDetailsState extends State<UserDetails> {
               height:
                   screenSize(context).height - safeAreaSize(context).top - 56,
               width: screenSize(context).width,
-              child: Column(
-                children: [
-                  GestureDetector(
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Colors.white,
-                      backgroundImage: AssetImage(
-                        "${URL_IMAGE_DEFAULT}logo.png",
-                      ),
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          child: FavoriteStar(nickname: "EduFranchi"),
+              child: _searchUserViewModel.busy
+                  ? Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              top: (screenSize(context).height -
+                                      safeAreaSize(context).top -
+                                      56 -
+                                      25) /
+                                  2),
+                          child: SizedBox(
+                            width: 50,
+                            height: 50,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(BG_COLOR_DEFAULT),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        GestureDetector(
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundColor: Colors.white,
+                            backgroundImage: _userModel.avatarUrl != null
+                                ? NetworkImage(
+                                    _userModel.avatarUrl,
+                                  )
+                                : AssetImage("$URL_IMAGE_DEFAULT/logo.png"),
+                            child: Align(
+                              alignment: Alignment.bottomRight,
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                child: FavoriteStar(nickname: _userModel.login),
+                              ),
+                            ),
+                          ),
+                          onTap: () {
+                            _openPicture();
+                          },
+                        ),
+                        Padding(padding: EdgeInsets.only(top: 20)),
+                        _userModel.bio != null
+                            ? Column(
+                                children: [
+                                  Text(
+                                    _userModel.login,
+                                    style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Padding(padding: EdgeInsets.only(top: 10))
+                                ],
+                              )
+                            : Container(),
+                        _userModel.email != null
+                            ? Column(
+                                children: [
+                                  Text(
+                                    _userModel.email,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  Padding(padding: EdgeInsets.only(top: 10))
+                                ],
+                              )
+                            : Container(),
+                        _userModel.location != null
+                            ? Column(
+                                children: [
+                                  Text(
+                                    _userModel.location,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  Padding(padding: EdgeInsets.only(top: 10))
+                                ],
+                              )
+                            : Container(),
+                        _userModel.bio != null
+                            ? Text(
+                                _userModel.bio,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                                textAlign: TextAlign.justify,
+                              )
+                            : Container(),
+                      ],
                     ),
-                    onTap: () {
-                      _openPicture();
-                    },
-                  ),
-                  Padding(padding: EdgeInsets.only(top: 20)),
-                  Text(
-                    "EduFranchi",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Padding(padding: EdgeInsets.only(top: 10)),
-                  Text(
-                    "eduardoafdo@hotmail.com",
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                  ),
-                  Padding(padding: EdgeInsets.only(top: 10)),
-                  Text(
-                    "Londrina/PR - BR",
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                  ),
-                  Padding(padding: EdgeInsets.only(top: 10)),
-                  Text(
-                    "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source.",
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                    textAlign: TextAlign.justify,
-                  ),
-                ],
-              ),
             ),
           ),
         ),

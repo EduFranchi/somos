@@ -10,15 +10,10 @@ import 'default/my_functions.dart';
 
 class OpenPicture extends StatefulWidget {
   OpenPicture({
-    //@required this.pictureId,
-    //@required this.pictureBytes,
-    this.pictureId,
-    this.pictureBytes,
+    @required this.avatarUrl,
   });
 
-  final int pictureId;
-
-  final Uint8List pictureBytes;
+  final String avatarUrl;
 
   @override
   _OpenPictureState createState() => _OpenPictureState();
@@ -74,8 +69,7 @@ class _OpenPictureState extends State<OpenPicture> {
                         safeAreaSize(context).top -
                         56,
                     child: PhotoView(
-                      //imageProvider: MemoryImage(widget.pictureBytes),
-                      imageProvider: AssetImage("${URL_IMAGE_DEFAULT}logo.png"),
+                      imageProvider: NetworkImage(widget.avatarUrl),
                       backgroundDecoration:
                           BoxDecoration(color: Colors.transparent),
                     ),
