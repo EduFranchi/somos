@@ -11,9 +11,12 @@ import 'package:somos/view/default/my_widgets.dart';
 class UserDetails extends StatefulWidget {
   UserDetails({
     @required this.model,
+    this.hideAtDesfavorite = false,
   });
 
   final UserModel model;
+
+  final bool hideAtDesfavorite;
 
   @override
   _UserDetailsState createState() => _UserDetailsState();
@@ -23,6 +26,7 @@ class _UserDetailsState extends State<UserDetails> {
   UserController _userController = UserController();
   SearchUserViewModel _searchUserViewModel = SearchUserViewModel();
   UserModel _userModel = UserModel();
+  bool _connected = false;
 
   _openPicture() {
     Navigator.push(
@@ -63,12 +67,35 @@ class _UserDetailsState extends State<UserDetails> {
     });
   }
 
+  _getFavoriteSingle() async {
+    setState(() {
+      _searchUserViewModel.busy = true;
+    });
+    var response =
+        await _userController.getFavoriteList(nickname: widget.model.login);
+    if (response.message.isEmpty) {
+      _userModel = response.list[0];
+    } else {
+      flutterToastDefault(response.message);
+    }
+    setState(() {
+      _searchUserViewModel.busy = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    checkConnectionInternet().then((value) => _connected = value);
     if (widget.model != null && widget.model.login.isNotEmpty) {
       _searchUserViewModel.nickname = widget.model.login;
-      _getUserList();
+      checkConnectionInternet().then((value) {
+        if (value) {
+          _getUserList();
+        } else {
+          _getFavoriteSingle();
+        }
+      });
     } else {
       flutterToastDefault("Usuário não encontrado!");
       Navigator.pop(context);
@@ -127,22 +154,29 @@ class _UserDetailsState extends State<UserDetails> {
                           child: CircleAvatar(
                             radius: 60,
                             backgroundColor: Colors.white,
-                            backgroundImage: _userModel.avatarUrl != null
+                            backgroundImage: _userModel.avatarUrl != null &&
+                                    _connected
                                 ? NetworkImage(
                                     _userModel.avatarUrl,
                                   )
-                                : AssetImage("$URL_IMAGE_DEFAULT/logo.png"),
+                                : AssetImage("${URL_IMAGE_DEFAULT}logo.png"),
                             child: Align(
                               alignment: Alignment.bottomRight,
                               child: Container(
                                 width: 30,
                                 height: 30,
-                                child: FavoriteStar(model: _userModel),
+                                child: FavoriteStar(
+                                  model: _userModel,
+                                  hideAtDesfavorite: widget.hideAtDesfavorite,
+                                  funcReload: (_) {
+                                    Navigator.pop(context);
+                                  },
+                                ),
                               ),
                             ),
                           ),
                           onTap: () {
-                            _openPicture();
+                            if (_connected) _openPicture();
                           },
                         ),
                         Padding(padding: EdgeInsets.only(top: 20)),

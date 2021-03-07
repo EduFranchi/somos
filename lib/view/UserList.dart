@@ -33,7 +33,7 @@ class _UserListState extends State<UserList> {
           return FavoriteList();
         },
       ),
-    );
+    ).then((value) => _getUserList());
   }
 
   _getUserList() {

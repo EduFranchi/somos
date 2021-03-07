@@ -7,9 +7,15 @@ import 'package:somos/view/default/my_functions.dart';
 class FavoriteStar extends StatefulWidget {
   FavoriteStar({
     @required this.model,
+    this.hideAtDesfavorite = false,
+    this.funcReload,
   });
 
   final UserModel model;
+
+  final bool hideAtDesfavorite;
+
+  final Function(dynamic) funcReload;
 
   @override
   _FavoriteStarState createState() => _FavoriteStarState();
@@ -22,29 +28,29 @@ class _FavoriteStarState extends State<FavoriteStar> {
   SearchUserViewModel _searchUserViewModel = SearchUserViewModel();
 
   _saveFavorite() async {
-    setState(() {});
     if (_iconFavorite == Icons.star_border) {
       setState(() {
-        _iconFavorite = Icons.star;
+        widget.model.isFavorite = true;
       });
       _searchUserViewModel.nickname = widget.model.login;
       await _userController.insertFavorite(_searchUserViewModel).then((value) {
         if (value.message.isNotEmpty) {
           flutterToastDefault(value.message);
-          _iconFavorite = Icons.star_border;
+          widget.model.isFavorite = false;
         }
         setState(() {});
       });
     } else {
       setState(() {
-        _iconFavorite = Icons.star_border;
+        widget.model.isFavorite = false;
       });
       _searchUserViewModel.nickname = widget.model.login;
       await _userController.deleteFavorite(_searchUserViewModel).then((value) {
         if (value.message.isNotEmpty) {
           flutterToastDefault(value.message);
-          _iconFavorite = Icons.star;
+          widget.model.isFavorite = false;
         }
+        if (widget.hideAtDesfavorite) widget.funcReload(dynamic);
         setState(() {});
       });
     }
@@ -53,11 +59,11 @@ class _FavoriteStarState extends State<FavoriteStar> {
   @override
   void initState() {
     super.initState();
-    _iconFavorite = widget.model.isFavorite ? Icons.star : Icons.star_border;
   }
 
   @override
   Widget build(BuildContext context) {
+    _iconFavorite = widget.model.isFavorite ? Icons.star : Icons.star_border;
     return _searchUserViewModel.busy
         ? SizedBox(
             width: 20,

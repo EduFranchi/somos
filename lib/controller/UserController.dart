@@ -50,8 +50,9 @@ class UserController {
     return response;
   }
 
-  Future<ErrorViewModel> getFavoriteList() async {
-    ErrorViewModel response = await repository.getFavoriteList();
+  Future<ErrorViewModel> getFavoriteList({String nickname = ""}) async {
+    ErrorViewModel response =
+        await repository.getFavoriteList(nickname: nickname);
     return response;
   }
 

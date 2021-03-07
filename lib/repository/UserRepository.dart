@@ -102,20 +102,35 @@ class UserRepository {
   }
 
   //Get Favorite List local
-  Future<ErrorViewModel> getFavoriteList() async {
+  Future<ErrorViewModel> getFavoriteList({String nickname = ""}) async {
     ErrorViewModel errorViewModel = ErrorViewModel();
 
     try {
       final Database db = await getDatabase();
 
-      final List<Map<String, dynamic>> maps = await db.query(
-        TABLE_FAVORITE_USERS_NAME,
-      );
+      List<dynamic> whereArgs;
+      String where;
+
+      List<Map<String, dynamic>> maps;
+      if (nickname != null && nickname.isNotEmpty) {
+        where = "login = ?";
+        whereArgs = List<dynamic>();
+        whereArgs.add(nickname);
+        maps = await db.query(
+          TABLE_FAVORITE_USERS_NAME,
+          where: where,
+          whereArgs: whereArgs,
+        );
+      } else {
+        maps = await db.query(TABLE_FAVORITE_USERS_NAME);
+      }
 
       errorViewModel.list = List.generate(
         maps.length,
         (i) {
-          return UserModel.fromJson(maps[i]);
+          UserModel temp = UserModel.fromJson(maps[i]);
+          temp.isFavorite = true;
+          return temp;
         },
       );
     } on DatabaseException catch (e) {
