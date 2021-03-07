@@ -22,34 +22,34 @@ class _FavoriteListState extends State<FavoriteList> {
     setState(() {
       _busy = true;
     });
-    var response = await _userController.getFavoriteList();
-    if (response.message.isEmpty) {
+    var responseFavorite = await _userController.getFavoriteList();
+    if (responseFavorite.message.isEmpty) {
       _listUserModel = List.generate(
-        response.list.length,
+        responseFavorite.list.length,
         (i) {
-          return response.list[i];
+          return responseFavorite.list[i];
         },
       );
       _listUserModelShow = List.generate(
-        response.list.length,
+        responseFavorite.list.length,
         (i) {
-          return response.list[i];
+          return responseFavorite.list[i];
         },
       );
     } else {
-      flutterToastDefault(response.message);
+      flutterToastDefault(responseFavorite.message);
     }
     setState(() {
       _busy = false;
     });
   }
 
-  _searchUserList(String value) {
+  _searchUserList(String text) {
     _listUserModelShow.clear();
-    _listUserModel.forEach((element) {
-      if (element.login.toLowerCase().contains(value.toLowerCase())) {
+    _listUserModel.forEach((elementUser) {
+      if (elementUser.login.toLowerCase().contains(text.toLowerCase())) {
         setState(() {
-          _listUserModelShow.add(element);
+          _listUserModelShow.add(elementUser);
         });
       }
     });
@@ -95,13 +95,13 @@ class _FavoriteListState extends State<FavoriteList> {
                       labelText: "Pesquisar",
                       alignLabelWithHint: true,
                     ),
-                    onChanged: (value) {
-                      if (value.length > 0) {
-                        _searchUserList(value);
+                    onChanged: (valueTextFiel) {
+                      if (valueTextFiel.length > 0) {
+                        _searchUserList(valueTextFiel);
                       } else {
                         _listUserModelShow.clear();
-                        _listUserModel.forEach((element) {
-                          _listUserModelShow.add(element);
+                        _listUserModel.forEach((elementUser) {
+                          _listUserModelShow.add(elementUser);
                         });
                       }
                       setState(() {});
@@ -135,8 +135,8 @@ class _FavoriteListState extends State<FavoriteList> {
                           itemCount: _listUserModelShow.length,
                           itemBuilder: (_, index) {
                             return UserSimple(
-                              model: _listUserModelShow[index],
-                              funcReload: (value) {
+                              userModel: _listUserModelShow[index],
+                              funcReload: (_) {
                                 _getFavoriteList();
                               },
                               hideAtDesfavorite: true,

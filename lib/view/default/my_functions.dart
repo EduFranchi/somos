@@ -18,15 +18,15 @@ EdgeInsets safeAreaSize(BuildContext context) {
 
 double deviceRatioDefault(BuildContext context,
     {Orientation orientation = Orientation.portrait}) {
-  double result;
+  double resultSize;
 
   if (orientation == Orientation.landscape) {
-    result = (screenSize(context).height) / (screenSize(context).width);
+    resultSize = (screenSize(context).height) / (screenSize(context).width);
   } else {
-    result = screenSize(context).width / (screenSize(context).height);
+    resultSize = screenSize(context).width / (screenSize(context).height);
   }
 
-  return result;
+  return resultSize;
 }
 
 //Create DATABASE
@@ -57,8 +57,9 @@ flutterToastDefault(String message) {
 
 Future<bool> checkConnectionInternet() async {
   try {
-    final result = await InternetAddress.lookup('google.com');
-    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+    final resultConnection = await InternetAddress.lookup('google.com');
+    if (resultConnection.isNotEmpty &&
+        resultConnection[0].rawAddress.isNotEmpty) {
       return true;
     } else {
       return false;

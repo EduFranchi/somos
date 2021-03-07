@@ -1,10 +1,10 @@
 class SearchUserViewModel {
-  String nickname;
+  String login;
   int qtdePerPage;
   bool busy;
 
   SearchUserViewModel({
-    this.nickname,
+    this.login,
     this.busy = false,
   });
 }

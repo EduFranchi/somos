@@ -10,11 +10,11 @@ import 'package:somos/view/default/my_widgets.dart';
 
 class UserDetails extends StatefulWidget {
   UserDetails({
-    @required this.model,
+    @required this.userModel,
     this.hideAtDesfavorite = false,
   });
 
-  final UserModel model;
+  final UserModel userModel;
 
   final bool hideAtDesfavorite;
 
@@ -26,7 +26,7 @@ class _UserDetailsState extends State<UserDetails> {
   UserController _userController = UserController();
   SearchUserViewModel _searchUserViewModel = SearchUserViewModel();
   UserModel _userModel = UserModel();
-  bool _connected = false;
+  bool _connectedInternet = false;
 
   _openPicture() {
     Navigator.push(
@@ -43,20 +43,20 @@ class _UserDetailsState extends State<UserDetails> {
     setState(() {
       _searchUserViewModel.busy = true;
     });
-    _userController.getUserList(_searchUserViewModel).then((value) {
-      if (value.message.isEmpty) {
-        _userModel = value.list[0];
+    _userController.getUserList(_searchUserViewModel).then((responseUser) {
+      if (responseUser.message.isEmpty) {
+        _userModel = responseUser.list[0];
         setState(() {
           _searchUserViewModel.busy = false;
         });
-      } else if (value.list[0] == null) {
+      } else if (responseUser.list[0] == null) {
         flutterToastDefault(
             "Usuário não encontrado!\nVerifique sua conexão com a internet.");
         setState(() {
           _searchUserViewModel.busy = false;
         });
       } else {
-        flutterToastDefault(value.message);
+        flutterToastDefault(responseUser.message);
         setState(() {
           _searchUserViewModel.busy = false;
         });
@@ -71,12 +71,12 @@ class _UserDetailsState extends State<UserDetails> {
     setState(() {
       _searchUserViewModel.busy = true;
     });
-    var response =
-        await _userController.getFavoriteList(nickname: widget.model.login);
-    if (response.message.isEmpty) {
-      _userModel = response.list[0];
+    var responseFavorite =
+        await _userController.getFavoriteList(nickname: widget.userModel.login);
+    if (responseFavorite.message.isEmpty) {
+      _userModel = responseFavorite.list[0];
     } else {
-      flutterToastDefault(response.message);
+      flutterToastDefault(responseFavorite.message);
     }
     setState(() {
       _searchUserViewModel.busy = false;
@@ -86,9 +86,9 @@ class _UserDetailsState extends State<UserDetails> {
   @override
   void initState() {
     super.initState();
-    checkConnectionInternet().then((value) => _connected = value);
-    if (widget.model != null && widget.model.login.isNotEmpty) {
-      _searchUserViewModel.nickname = widget.model.login;
+    checkConnectionInternet().then((value) => _connectedInternet = value);
+    if (widget.userModel != null && widget.userModel.login.isNotEmpty) {
+      _searchUserViewModel.login = widget.userModel.login;
       checkConnectionInternet().then((value) {
         if (value) {
           _getUserList();
@@ -155,7 +155,7 @@ class _UserDetailsState extends State<UserDetails> {
                             radius: 60,
                             backgroundColor: Colors.white,
                             backgroundImage: _userModel.avatarUrl != null &&
-                                    _connected
+                                    _connectedInternet
                                 ? NetworkImage(
                                     _userModel.avatarUrl,
                                   )
@@ -166,7 +166,7 @@ class _UserDetailsState extends State<UserDetails> {
                                 width: 30,
                                 height: 30,
                                 child: FavoriteStar(
-                                  model: _userModel,
+                                  userModel: _userModel,
                                   hideAtDesfavorite: widget.hideAtDesfavorite,
                                   funcReload: (_) {
                                     Navigator.pop(context);
@@ -176,7 +176,7 @@ class _UserDetailsState extends State<UserDetails> {
                             ),
                           ),
                           onTap: () {
-                            if (_connected) _openPicture();
+                            if (_connectedInternet) _openPicture();
                           },
                         ),
                         Padding(padding: EdgeInsets.only(top: 20)),

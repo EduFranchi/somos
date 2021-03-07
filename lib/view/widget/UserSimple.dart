@@ -7,12 +7,12 @@ import 'package:somos/view/default/my_widgets.dart';
 
 class UserSimple extends StatefulWidget {
   UserSimple({
-    @required this.model,
+    @required this.userModel,
     @required this.funcReload,
     this.hideAtDesfavorite = false,
   });
 
-  final UserModel model;
+  final UserModel userModel;
 
   final Function(dynamic) funcReload;
 
@@ -23,28 +23,32 @@ class UserSimple extends StatefulWidget {
 }
 
 class _UserSimpleState extends State<UserSimple> {
-  bool _connected = false;
+  bool _connectedInternet = false;
 
   _openUserDetails() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) {
-          return UserDetails(
-            model: widget.model,
-            hideAtDesfavorite: widget.hideAtDesfavorite,
-          );
-        },
-      ),
-    ).then(widget.funcReload);
+    if (_connectedInternet || widget.hideAtDesfavorite) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) {
+            return UserDetails(
+              userModel: widget.userModel,
+              hideAtDesfavorite: widget.hideAtDesfavorite,
+            );
+          },
+        ),
+      ).then(widget.funcReload);
+    } else {
+      flutterToastDefault("Verifique sua conexão com a internet");
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    checkConnectionInternet().then((value) {
+    checkConnectionInternet().then((responseConnetion) {
       setState(() {
-        _connected = value;
+        _connectedInternet = responseConnetion;
       });
     });
   }
@@ -58,9 +62,9 @@ class _UserSimpleState extends State<UserSimple> {
         children: [
           Row(
             children: [
-              (_connected
+              (_connectedInternet
                   ? Image.network(
-                      widget.model.avatarUrl,
+                      widget.userModel.avatarUrl,
                       height: 50,
                       width: 50,
                     )
@@ -71,7 +75,7 @@ class _UserSimpleState extends State<UserSimple> {
                     )),
               Padding(padding: EdgeInsets.only(right: 10)),
               Text(
-                widget.model.login,
+                widget.userModel.login,
                 style: TextStyle(
                   fontSize: 20,
                 ),
@@ -82,7 +86,7 @@ class _UserSimpleState extends State<UserSimple> {
             width: 30,
             height: 30,
             child: FavoriteStar(
-              model: widget.model,
+              userModel: widget.userModel,
               hideAtDesfavorite: widget.hideAtDesfavorite,
               funcReload: widget.funcReload,
             ),

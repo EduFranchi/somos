@@ -6,12 +6,12 @@ import 'package:somos/view/default/my_functions.dart';
 
 class FavoriteStar extends StatefulWidget {
   FavoriteStar({
-    @required this.model,
+    @required this.userModel,
     this.hideAtDesfavorite = false,
     this.funcReload,
   });
 
-  final UserModel model;
+  final UserModel userModel;
 
   final bool hideAtDesfavorite;
 
@@ -30,29 +30,29 @@ class _FavoriteStarState extends State<FavoriteStar> {
   _saveFavorite() async {
     if (_iconFavorite == Icons.star_border) {
       setState(() {
-        widget.model.isFavorite = true;
+        widget.userModel.isFavorite = true;
       });
-      _searchUserViewModel.nickname = widget.model.login;
-      await _userController.insertFavorite(_searchUserViewModel).then((value) {
-        if (value.message.isNotEmpty) {
-          flutterToastDefault(value.message);
-          widget.model.isFavorite = false;
-        }
-        setState(() {});
-      });
+      _searchUserViewModel.login = widget.userModel.login;
+      var responseInsertFavorite =
+          await _userController.insertFavorite(_searchUserViewModel);
+      if (responseInsertFavorite.message.isNotEmpty) {
+        flutterToastDefault(responseInsertFavorite.message);
+        widget.userModel.isFavorite = false;
+      }
+      setState(() {});
     } else {
       setState(() {
-        widget.model.isFavorite = false;
+        widget.userModel.isFavorite = false;
       });
-      _searchUserViewModel.nickname = widget.model.login;
-      await _userController.deleteFavorite(_searchUserViewModel).then((value) {
-        if (value.message.isNotEmpty) {
-          flutterToastDefault(value.message);
-          widget.model.isFavorite = false;
-        }
-        if (widget.hideAtDesfavorite) widget.funcReload(dynamic);
-        setState(() {});
-      });
+      _searchUserViewModel.login = widget.userModel.login;
+      var responseDeleteFavorite =
+          await _userController.deleteFavorite(_searchUserViewModel);
+      if (responseDeleteFavorite.message.isNotEmpty) {
+        flutterToastDefault(responseDeleteFavorite.message);
+        widget.userModel.isFavorite = false;
+      }
+      if (widget.hideAtDesfavorite) widget.funcReload(dynamic);
+      setState(() {});
     }
   }
 
@@ -63,7 +63,8 @@ class _FavoriteStarState extends State<FavoriteStar> {
 
   @override
   Widget build(BuildContext context) {
-    _iconFavorite = widget.model.isFavorite ? Icons.star : Icons.star_border;
+    _iconFavorite =
+        widget.userModel.isFavorite ? Icons.star : Icons.star_border;
     return _searchUserViewModel.busy
         ? SizedBox(
             width: 20,

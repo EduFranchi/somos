@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
@@ -27,7 +25,7 @@ class _OpenPictureState extends State<OpenPicture> {
     super.initState();
 
     Screen.brightness.then(
-      (value) async {
+      (_) async {
         _brightness = await Screen.brightness;
         Screen.setBrightness(1);
       },

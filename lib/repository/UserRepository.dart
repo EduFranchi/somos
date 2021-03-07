@@ -10,16 +10,19 @@ import 'package:sqflite/sqflite.dart';
 
 class UserRepository {
   //GET User by API Github
-  Future<ErrorViewModel> getListByAPI(SearchUserViewModel model) async {
+  Future<ErrorViewModel> getListByAPI(
+      SearchUserViewModel searchUserViewModel) async {
     ErrorViewModel errorViewModel = ErrorViewModel();
 
-    bool byNickname = model.nickname != null && model.nickname.trim() != "";
+    bool byNickname = searchUserViewModel.login != null &&
+        searchUserViewModel.login.trim() != "";
 
     try {
-      String param = byNickname ? "/${model.nickname.trim()}" : "";
+      String param = byNickname ? "/${searchUserViewModel.login.trim()}" : "";
 
-      param += model.qtdePerPage != null && model.qtdePerPage > 0
-          ? "?per_page=${model.qtdePerPage}"
+      param += searchUserViewModel.qtdePerPage != null &&
+              searchUserViewModel.qtdePerPage > 0
+          ? "?per_page=${searchUserViewModel.qtdePerPage}"
           : "";
       String url = "$URL_API_DEFAULT$param";
 
@@ -34,18 +37,18 @@ class UserRepository {
       )
           .then(
         (value) {
-          var response = json.decode(value.body);
-          if (response.runtimeType.toString() != "List<dynamic>" &&
-              response["message"] != null) {
-            print("ERROR API: ${response["message"]}");
-            errorViewModel.message = response["message"];
+          var responseUser = json.decode(value.body);
+          if (responseUser.runtimeType.toString() != "List<dynamic>" &&
+              responseUser["message"] != null) {
+            print("ERROR API: ${responseUser["message"]}");
+            errorViewModel.message = responseUser["message"];
           } else {
             errorViewModel.list = List.generate(
-              byNickname ? 1 : response.length,
+              byNickname ? 1 : responseUser.length,
               (i) {
                 return byNickname
-                    ? UserModel.fromJson(response)
-                    : UserModel.fromJson(response[i]);
+                    ? UserModel.fromJson(responseUser)
+                    : UserModel.fromJson(responseUser[i]);
               },
             );
           }
@@ -60,14 +63,14 @@ class UserRepository {
   }
 
   //Insert Favorite local
-  Future<ErrorViewModel> insertFavorite(UserModel model) async {
+  Future<ErrorViewModel> insertFavorite(UserModel userModel) async {
     ErrorViewModel errorViewModel = ErrorViewModel();
     try {
       final Database db = await getDatabase();
 
       await db.insert(
         TABLE_FAVORITE_USERS_NAME,
-        model.toJson(),
+        userModel.toJson(),
       );
     } on DatabaseException catch (e) {
       print("ERROR DatabaseException: $e");
@@ -80,8 +83,10 @@ class UserRepository {
   }
 
   //Delete Favorite local
-  Future<ErrorViewModel> deleteFavorite(SearchUserViewModel model) async {
-    ErrorViewModel errorViewModel = new ErrorViewModel(obj: model);
+  Future<ErrorViewModel> deleteFavorite(
+      SearchUserViewModel searchUserViewModel) async {
+    ErrorViewModel errorViewModel =
+        new ErrorViewModel(obj: searchUserViewModel);
 
     try {
       final Database db = await getDatabase();
@@ -89,7 +94,7 @@ class UserRepository {
       await db.delete(
         TABLE_FAVORITE_USERS_NAME,
         where: "login = ?",
-        whereArgs: [model.nickname],
+        whereArgs: [searchUserViewModel.login],
       );
     } on DatabaseException catch (e) {
       print("ERROR DatabaseException: $e");
@@ -128,9 +133,9 @@ class UserRepository {
       errorViewModel.list = List.generate(
         maps.length,
         (i) {
-          UserModel temp = UserModel.fromJson(maps[i]);
-          temp.isFavorite = true;
-          return temp;
+          UserModel userModelTemp = UserModel.fromJson(maps[i]);
+          userModelTemp.isFavorite = true;
+          return userModelTemp;
         },
       );
     } on DatabaseException catch (e) {

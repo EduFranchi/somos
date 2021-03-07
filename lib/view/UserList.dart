@@ -40,26 +40,26 @@ class _UserListState extends State<UserList> {
     setState(() {
       _searchUserViewModel.busy = true;
     });
-    _searchUserViewModel.nickname = _controllerSearch.text.trim();
-    _userController.getUserList(_searchUserViewModel).then((value) {
-      if (value.message.isEmpty) {
+    _searchUserViewModel.login = _controllerSearch.text.trim();
+    _userController.getUserList(_searchUserViewModel).then((responseUser) {
+      if (responseUser.message.isEmpty) {
         _listUserModel = List.generate(
-          value.list.length,
+          responseUser.list.length,
           (i) {
-            return value.list[i];
+            return responseUser.list[i];
           },
         );
         _listUserModelShow = List.generate(
-          value.list.length,
+          responseUser.list.length,
           (i) {
-            return value.list[i];
+            return responseUser.list[i];
           },
         );
         setState(() {
           _searchUserViewModel.busy = false;
         });
       } else {
-        flutterToastDefault(value.message);
+        flutterToastDefault(responseUser.message);
         setState(() {
           _searchUserViewModel.busy = false;
         });
@@ -104,10 +104,11 @@ class _UserListState extends State<UserList> {
                   alignLabelWithHint: true,
                 ),
                 onTap: () => _controllerQtdePerPage.text = "",
-                onChanged: (value) {
-                  int temp = int.tryParse(value);
-                  if (temp.runtimeType == int)
-                    _searchUserViewModel.qtdePerPage = int.tryParse(value);
+                onChanged: (valueTextField) {
+                  int checkParseInt = int.tryParse(valueTextField);
+                  if (checkParseInt.runtimeType == int)
+                    _searchUserViewModel.qtdePerPage =
+                        int.tryParse(valueTextField);
                   else
                     flutterToastDefault("Digite apenas números inteiros");
                 },
@@ -120,10 +121,10 @@ class _UserListState extends State<UserList> {
     dialog.build();
   }
 
-  _searchUserList(String value) {
+  _searchUserList(String text) {
     _listUserModelShow.clear();
     _listUserModel.forEach((element) {
-      if (element.login.toLowerCase().contains(value.toLowerCase())) {
+      if (element.login.toLowerCase().contains(text.toLowerCase())) {
         setState(() {
           _listUserModelShow.add(element);
         });
@@ -193,13 +194,13 @@ class _UserListState extends State<UserList> {
                         labelText: "Pesquisar",
                         alignLabelWithHint: true,
                       ),
-                      onChanged: (value) {
-                        if (value.length > 0) {
-                          _searchUserList(value);
+                      onChanged: (valueTextField) {
+                        if (valueTextField.length > 0) {
+                          _searchUserList(valueTextField);
                         } else {
                           _listUserModelShow.clear();
-                          _listUserModel.forEach((element) {
-                            _listUserModelShow.add(element);
+                          _listUserModel.forEach((elementUser) {
+                            _listUserModelShow.add(elementUser);
                           });
                         }
                         setState(() {});
@@ -259,8 +260,8 @@ class _UserListState extends State<UserList> {
                             itemCount: _listUserModelShow.length,
                             itemBuilder: (_, index) {
                               return UserSimple(
-                                model: _listUserModelShow[index],
-                                funcReload: (value) {
+                                userModel: _listUserModelShow[index],
+                                funcReload: (_) {
                                   _getUserList();
                                 },
                               );
